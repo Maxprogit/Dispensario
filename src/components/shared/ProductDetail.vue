@@ -2,13 +2,22 @@
   <v-card v-if="product" class="detail-card" elevation="0">
     <v-row>
       <v-col cols="12" md="5" class="d-flex flex-column align-center justify-start pt-4">
-        <v-img :src="product.imageUrl" width="280" height="280" class="detail-image mb-4" contain>
-          <template #error>
-            <div class="img-error-fallback d-flex align-center justify-center">
-              <v-icon size="48" color="grey-darken-1">mdi-image-off</v-icon>
-            </div>
-          </template>
-        </v-img>
+        
+        <!-- Contenedor relativo para el overlay del stock -->
+        <div class="image-wrapper mb-4">
+          <v-img :src="product.imageUrl" width="280" height="200" class="detail-image" :class="{ 'img-grayscale': product.stock === 0 }" contain>
+            <template #error>
+              <div class="img-error-fallback d-flex align-center justify-center">
+                <v-icon size="48" color="grey-darken-1">mdi-image-off</v-icon>
+              </div>
+            </template>
+          </v-img>
+
+          <!-- Overlay de AGOTADO -->
+          <div v-if="product.stock === 0" class="agotado-overlay d-flex align-center justify-center">
+            <span class="agotado-text">AGOTADO</span>
+          </div>
+        </div>
 
         <div class="greensometro">
           <span class="greensometro-label">Greensometro</span>
@@ -38,6 +47,7 @@
         </v-card-subtitle>
 
         <div v-if="presentaciones.length > 0" class="detail-specs mt-3">
+          <!-- Deshabilitado si no hay stock -->
           <v-select
             v-if="presentaciones.length > 1"
             v-model="selectedPeso"
@@ -46,15 +56,17 @@
             variant="outlined"
             density="compact"
             class="mb-3"
+            :disabled="product.stock === 0"
           />
 
           <div class="price-grid">
+            <!-- Deshabilitado visualmente si no hay stock -->
             <div
               v-for="p in presentaciones"
               :key="p.peso"
               class="price-row"
-              :class="{ 'price-row-active': p.peso === selectedPeso }"
-              @click="selectedPeso = p.peso"
+              :class="{ 'price-row-active': p.peso === selectedPeso, 'pointer-events-none opacity-50': product.stock === 0 }"
+              @click="product.stock > 0 ? selectedPeso = p.peso : null"
             >
               <span class="price-qty">{{ p.peso }}</span>
               <span class="price-val">{{ formatPriceMXN(p.precio) }}</span>
@@ -65,14 +77,30 @@
         <v-divider class="my-4 border-opacity-25" />
 
         <div class="purchase-block">
-          <v-text-field v-model="quantity" label="Cantidad" type="number" min="1" density="compact" variant="outlined"
-            style="max-width: 120px;" />
+          <!-- Deshabilitado si no hay stock -->
+          <v-text-field 
+            v-model="quantity" 
+            label="Cantidad" 
+            type="number" 
+            min="1" 
+            density="compact" 
+            variant="outlined"
+            style="max-width: 120px;"
+            :disabled="product.stock === 0"
+          />
           <div class="total-row">
             <span>Total</span>
             <span class="total-amount">{{ totalDisplay }}</span>
           </div>
-          <v-btn color="green-darken-3" class="mt-3 buy-btn" @click="buyProduct">
-            <FontAwesomeIcon icon="fa-brands fa-whatsapp" class="mr-2" /> Comprar
+          
+          <!-- Botón condicionado al stock -->
+          <v-btn 
+            :color="product.stock === 0 ? 'grey-darken-2' : 'green-darken-3'" 
+            class="mt-3 buy-btn" 
+            :disabled="product.stock === 0"
+            @click="buyProduct">
+            <FontAwesomeIcon icon="fa-brands fa-whatsapp" class="mr-2" /> 
+            {{ product.stock === 0 ? 'Agotado' : 'Comprar' }}
           </v-btn>
         </div>
       </v-col>
@@ -99,12 +127,8 @@ const selectedPeso = ref(null);
 
 const { openPurchaseForm } = usePurchaseForm();
 
-// Todas las presentaciones (peso + precio) del producto seleccionado.
 const presentaciones = computed(() => props.product?.presentaciones ?? []);
 
-// Cada vez que cambia el producto seleccionado en el catálogo, se
-// reinicia el peso elegido a la presentación más barata (la primera,
-// ya vienen ordenadas por precio) y la cantidad vuelve a 1.
 watch(
   () => props.product,
   (product) => {
@@ -144,6 +168,39 @@ const buyProduct = () => {
   justify-content: center !important;
 }
 
+/* --- WRAPPER Y CLASES DE STOCK --- */
+.image-wrapper {
+  position: relative;
+  width: 280px; /* Mismo ancho que tu foto */
+  border-radius: 16px;
+}
+.img-grayscale {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+.agotado-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+  z-index: 2;
+}
+.agotado-text {
+  color: #ff5252;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  border: 4px solid #ff5252;
+  padding: 5px 25px;
+  transform: rotate(-15deg);
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+}
+/* --------------------------------- */
+
 .detail-image {
   width: 280px;
   height: 280px;
@@ -151,6 +208,7 @@ const buyProduct = () => {
   background: #0c0c0c; 
   border: 1px solid rgba(76, 175, 80, 0.15);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); 
+  transition: filter 0.3s ease;
 }
 
 .img-error-fallback {
@@ -275,4 +333,8 @@ const buyProduct = () => {
   min-height: 300px;
   color: #666;
 }
+
+/* Clases de utilidad para bloqueo manual */
+.pointer-events-none { pointer-events: none; }
+.opacity-50 { opacity: 0.5; }
 </style>

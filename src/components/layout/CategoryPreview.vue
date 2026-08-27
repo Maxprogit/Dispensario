@@ -44,19 +44,16 @@ import { fetchProductosPorCategoria } from '@/composables/useSupabaseProducts';
 const categories = ref([
   { label: 'Top Shelf', route: '/top-shelf', products: [] },
   { label: 'Pre-Rolados & Carts', route: '/otros', products: [] },
-  { label: 'Hongos', route: '/hongos', products: [] },
 ]);
 
 onMounted(async () => {
   try {
-    const [topShelf, otros, hongos] = await Promise.all([
+    const [topShelf, otros] = await Promise.all([
       fetchProductosPorCategoria('top-shelf'),
       fetchProductosPorCategoria('otros'),
-      fetchProductosPorCategoria('hongos'),
     ]);
     categories.value[0].products = topShelf.slice(0, 8);
     categories.value[1].products = otros;
-    categories.value[2].products = hongos;
   } catch (e) {
     console.error('Error cargando previews:', e);
   }

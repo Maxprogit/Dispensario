@@ -21,7 +21,6 @@
 
       <v-divider class="my-6 border-opacity-25" />
 
-      <!-- Sección previews de categorías (ACÁ SÍ VIVE EL CARRUSEL TOP SHELF) -->
       <CategoryPreview />
     </v-container>
 

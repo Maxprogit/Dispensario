@@ -41,12 +41,7 @@ import { faHouse, faHandPointRight, faStore, faBagShopping, faLock, faLeaf, faJo
 
 library.add(faFacebook, faInstagram, faTwitter, faPinterest, faWhatsapp, faHouse, faHandPointRight, faStore, faBagShopping, faLock, faLeaf, faJoint, faVial, faCookieBite, faCircleInfo, faJar, faCrown);
 
-// Antes no había tema configurado: Vuetify caía en su tema claro por
-// defecto, por eso los campos del formulario (labels, bordes) se veían
-// oscuros/casi ilegibles sobre el fondo oscuro del sitio. Este tema
-// reutiliza exactamente los mismos colores que ya existían en el CSS
-// del proyecto (#111111, #1a1a1a, #4caf50) — no se introduce ningún
-// color nuevo, solo se le informa a Vuetify cuáles ya se estaban usando.
+
 const vuetify = createVuetify({
     components,
     directives,
