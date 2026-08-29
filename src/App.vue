@@ -10,6 +10,19 @@
 import { RouterView } from 'vue-router';
 import AppNavbar from '@/components/layout/AppNavbar.vue';
 import PurchaseFormModal from '@/components/shared/PurchaseFormModal.vue';
+import { onMounted } from 'vue';
+import { supabase } from '@/supabase';
+
+
+onMounted(async () => {
+  try {
+    await supabase.from('system_logs').insert([
+      { event_type: 'Visita a la pagina principal' }
+    ])
+  } catch (error) {
+    
+  }
+})
 </script>
 
 <style>
