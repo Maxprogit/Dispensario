@@ -7,7 +7,7 @@ function formatDeliveryLine(order) {
     const address = order.address?.trim() || 'por confirmar';
     return `Entrega a domicilio (dirección: ${address})`;
   }
-  return 'Recoger en tienda';
+  return 'Recoger en punto medio';
 }
 
 
